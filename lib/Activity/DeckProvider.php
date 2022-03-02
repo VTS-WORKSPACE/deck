@@ -35,6 +35,7 @@ use OCP\IConfig;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
 use OCP\L10N\IFactory;
+use OCA\Deck\Service\CardService;
 
 class DeckProvider implements IProvider {
 
@@ -52,8 +53,10 @@ class DeckProvider implements IProvider {
 	private $l10nFactory;
 	/** @var IConfig */
 	private $config;
+	/** @var CardService */
+	private $cardService;
 
-	public function __construct(IURLGenerator $urlGenerator, ActivityManager $activityManager, IUserManager $userManager, ICommentsManager $commentsManager, IFactory $l10n, IConfig $config, $userId) {
+	public function __construct(IURLGenerator $urlGenerator, ActivityManager $activityManager, IUserManager $userManager, ICommentsManager $commentsManager, IFactory $l10n, IConfig $config, $userId, CardService $cardService) {
 		$this->userId = $userId;
 		$this->urlGenerator = $urlGenerator;
 		$this->activityManager = $activityManager;
@@ -61,6 +64,7 @@ class DeckProvider implements IProvider {
 		$this->userManager = $userManager;
 		$this->l10nFactory = $l10n;
 		$this->config = $config;
+		$this->cardService = $cardService;
 	}
 
 	/**
@@ -114,7 +118,7 @@ class DeckProvider implements IProvider {
 				'type' => 'highlight',
 				'id' => $event->getObjectId(),
 				'name' => $event->getObjectName(),
-				'link' => $this->getUrlForBoard('/board/' . $event->getObjectId()),
+				'link' => $this->deckUrl('/board/' . $event->getObjectId()),
 			];
 			$params['board'] = $board;
 		}
@@ -131,7 +135,7 @@ class DeckProvider implements IProvider {
 
 			if (array_key_exists('board', $subjectParams)) {
 				$archivedParam = $subjectParams['card']['archived'] ? 'archived/' : '';
-				$card['link'] = $this->getUrlForCard('/board/' . $subjectParams['board']['id'] . '/' . $archivedParam . 'card/' . $event->getObjectId(), $event->getObjectId());
+				$card['link'] = $this->cardService->getRedirectUrlForCard($event->getObjectId());
 			}
 			$params['card'] = $card;
 		}
@@ -214,7 +218,7 @@ class DeckProvider implements IProvider {
 				'type' => 'highlight',
 				'id' => $subjectParams[$paramName]['id'],
 				'name' => $subjectParams[$paramName]['title'],
-				'link' => $this->getUrlForBoard('/board/' . $subjectParams[$paramName]['id'] . '/'),
+				'link' => $this->deckUrl('/board/' . $subjectParams[$paramName]['id'] . '/'),
 			];
 		}
 		return $params;
@@ -356,11 +360,7 @@ class DeckProvider implements IProvider {
 		return $params;
 	}
 
-	public function getUrlForBoard($endpoint) {
+	public function deckUrl($endpoint) {
 		return $this->urlGenerator->linkToRouteAbsolute('deck.page.index') . '#' . $endpoint;
-	}
-
-	public function getUrlForCard($endpoint, $cardId = NULL) {
-		return $this->urlGenerator->linkToRouteAbsolute('deck.page.index') . "deckUrlToCard/$cardId";
 	}
 }

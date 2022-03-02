@@ -50,6 +50,7 @@ use OCA\Deck\Db\BoardMapper;
 use OCA\Deck\Db\LabelMapper;
 use OCP\IUserManager;
 use OCA\Deck\BadRequestException;
+use OCP\IURLGenerator;
 
 class BoardService {
 	private $boardMapper;
@@ -87,6 +88,7 @@ class BoardService {
 		ActivityManager $activityManager,
 		IEventDispatcher $eventDispatcher,
 		ChangeHelper $changeHelper,
+		IURLGenerator $urlGenerator,
 		$userId
 	) {
 		$this->boardMapper = $boardMapper;
@@ -104,6 +106,7 @@ class BoardService {
 		$this->eventDispatcher = $eventDispatcher;
 		$this->changeHelper = $changeHelper;
 		$this->userId = $userId;
+		$this->urlGenerator = $urlGenerator;
 	}
 
 	/**
@@ -696,5 +699,9 @@ class BoardService {
 			return;
 		}
 		$board->setUsers(array_values($boardUsers));
+	}
+
+	public function getBoardUrl($endpoint) {
+		return $this->urlGenerator->linkToRouteAbsolute('deck.page.index') . '#' . $endpoint;
 	}
 }
