@@ -12,7 +12,7 @@ sign_dir=$(build_dir)/sign
 cert_dir=$(HOME)/.nextcloud/certificates
 
 
-default: build
+default: build release
 
 clean-dist:
 	rm -rf node_modules/
@@ -59,3 +59,6 @@ test-integration:
 
 test-js: install-deps
 	npm run test
+
+release:
+	zip -r release.zip . -x "node_modules/*" "tests/*" "vendor/*" ".github/*" ".git/*"
